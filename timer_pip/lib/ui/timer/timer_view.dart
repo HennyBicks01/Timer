@@ -168,7 +168,7 @@ class TimerPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     
     double progress;
-    if (viewModel.isRunning) {
+    if (viewModel.remainingTime.inSeconds > 0) {
       progress = viewModel.remainingTime.inSeconds / (60 * 60);
     } else {
       progress = viewModel.selectedMinutes / 60;
