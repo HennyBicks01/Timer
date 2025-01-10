@@ -39,44 +39,61 @@ class _TimerViewState extends State<TimerView> with WidgetsBindingObserver {
         child: ListenableBuilder(
           listenable: _viewModel,
           builder: (context, _) {
-            final scale = _viewModel.isInPiPMode ? 0.8 : 1.0;
-            
-            return AspectRatio(
-              aspectRatio: 3/4,
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: 300 * scale,
-                  maxHeight: 400 * scale,
-                ),
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: SizedBox(
-                    width: 300,
-                    height: 400,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularTimerPicker(
-                          viewModel: _viewModel,
-                          size: 200,
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          '${_viewModel.remainingTime.inMinutes.toString().padLeft(2, '0')}:${(_viewModel.remainingTime.inSeconds % 60).toString().padLeft(2, '0')}',
-                          style: const TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
+            if (_viewModel.isInPiPMode) {
+              return AspectRatio(
+                aspectRatio: 3/4,
+                child: Container(
+                  constraints: const BoxConstraints(
+                    maxWidth: 300 * 0.8,
+                    maxHeight: 400 * 0.8,
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: SizedBox(
+                      width: 300,
+                      height: 400,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularTimerPicker(
+                            viewModel: _viewModel,
+                            size: 200,
                           ),
-                        ),
-                        if (!_viewModel.isInPiPMode) ...[
                           const SizedBox(height: 20),
-                          TimerControls(viewModel: _viewModel),
+                          Text(
+                            '${_viewModel.remainingTime.inMinutes.toString().padLeft(2, '0')}:${(_viewModel.remainingTime.inSeconds % 60).toString().padLeft(2, '0')}',
+                            style: const TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+              );
+            }
+            
+            // Normal mode layout
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularTimerPicker(
+                  viewModel: _viewModel,
+                  size: 300,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  '${_viewModel.remainingTime.inMinutes.toString().padLeft(2, '0')}:${(_viewModel.remainingTime.inSeconds % 60).toString().padLeft(2, '0')}',
+                  style: const TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TimerControls(viewModel: _viewModel),
+              ],
             );
           },
         ),
