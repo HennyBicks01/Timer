@@ -15,6 +15,18 @@ class TimerViewModel extends ChangeNotifier {
       _isInPiPMode = inPiPMode;
       notifyListeners();
     });
+
+    _pipService.setOnPlayRequestedListener(() {
+      if (!_isRunning) {
+        startTimer();
+      }
+    });
+
+    _pipService.setOnPauseRequestedListener(() {
+      if (_isRunning) {
+        pauseTimer();
+      }
+    });
   }
 
   int get selectedMinutes => _selectedMinutes;
