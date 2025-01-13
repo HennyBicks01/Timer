@@ -124,7 +124,7 @@ class CircularTimerPicker extends StatelessWidget {
           final center = box.size.center(Offset.zero);
           final position = details.localPosition - center;
           final angle = (atan2(position.dy, position.dx) * 180 / pi + 90) % 360;
-          final minutes = ((angle / 360) * 60).round();
+          final minutes = (angle / 360) * 60;
           viewModel.setMinutes(minutes);
         },
         child: CustomPaint(
@@ -171,7 +171,7 @@ class TimerPainter extends CustomPainter {
     if (viewModel.remainingTime.inSeconds > 0) {
       progress = viewModel.remainingTime.inSeconds / (60 * 60);
     } else {
-      progress = viewModel.selectedMinutes / 60;
+      progress = viewModel.selectedMinutes.toDouble() / 60;
     }
     
     canvas.drawArc(

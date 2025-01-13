@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../services/pip_service.dart';
+import 'package:flutter/services.dart' show MethodChannel, MethodCall;
 
 class TimerViewModel extends ChangeNotifier {
   final PiPService _pipService = PiPService();
-  int _selectedMinutes = 0;
+  static const platform = MethodChannel('com.example.timer_pip/timer');
+  double _selectedMinutes = 0;
   bool _isRunning = false;
   Duration _remainingTime = Duration.zero;
   Timer? _timer;
@@ -27,17 +29,19 @@ class TimerViewModel extends ChangeNotifier {
         pauseTimer();
       }
     });
+
+    platform.setMethodCallHandler(_handleMethodCall);
   }
 
-  int get selectedMinutes => _selectedMinutes;
+  int get selectedMinutes => _selectedMinutes.round();
   bool get isRunning => _isRunning;
   Duration get remainingTime => _remainingTime;
   bool get isInPiPMode => _isInPiPMode;
 
-  void setMinutes(int minutes) {
+  void setMinutes(double minutes) {
     if (_isRunning) return;
     _selectedMinutes = minutes;
-    _remainingTime = Duration(minutes: minutes);
+    _remainingTime = Duration(seconds: (minutes * 60).round());
     notifyListeners();
   }
 
@@ -70,7 +74,7 @@ class TimerViewModel extends ChangeNotifier {
   void resetTimer() {
     _isRunning = false;
     _timer?.cancel();
-    _remainingTime = Duration(minutes: _selectedMinutes);
+    _remainingTime = Duration(seconds: (_selectedMinutes * 60).round());
     _pipService.updateTimerStatus(false);
     notifyListeners();
   }
@@ -78,6 +82,17 @@ class TimerViewModel extends ChangeNotifier {
   Future<void> enterPiP() async {
     if (_isRunning) {
       await _pipService.enterPiP();
+    }
+  }
+
+  Future<void> _handleMethodCall(MethodCall call) async {
+    switch (call.method) {
+      case 'setTimer':
+        final seconds = call.arguments as int;
+        final minutes = seconds / 60;
+        setMinutes(minutes);
+        startTimer();
+        break;
     }
   }
 

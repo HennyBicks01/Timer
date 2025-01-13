@@ -27,6 +27,8 @@ class MainActivity : FlutterActivity() {
     private val CONTROL_TYPE_PLAY = 1
     private val CONTROL_TYPE_PAUSE = 2
     private val ACTION_PIP_CONTROL = "PIP_CONTROL"
+    private val TIMER_CHANNEL = "com.example.timer_pip/timer"
+    private lateinit var timerChannel: MethodChannel
 
     private val pipReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -42,6 +44,7 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerReceiver(pipReceiver, IntentFilter(ACTION_PIP_CONTROL))
+        handleIntent(intent)
     }
 
     override fun onDestroy() {
@@ -53,6 +56,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        timerChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, TIMER_CHANNEL)
         methodChannel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "enterPiP" -> {
@@ -166,6 +170,7 @@ class MainActivity : FlutterActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handlePiPControl(intent)
+        handleIntent(intent)
     }
 
     private fun handlePiPControl(intent: Intent) {
@@ -173,6 +178,15 @@ class MainActivity : FlutterActivity() {
             when (intent.getStringExtra("control")) {
                 "play" -> methodChannel.invokeMethod("playTimer", null)
                 "pause" -> methodChannel.invokeMethod("pauseTimer", null)
+            }
+        }
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.action == "android.intent.action.SET_TIMER") {
+            val seconds = intent.getIntExtra("android.intent.extra.alarm.LENGTH", 0)
+            if (seconds > 0) {
+                timerChannel.invokeMethod("setTimer", seconds)
             }
         }
     }
